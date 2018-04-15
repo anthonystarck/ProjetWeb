@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="row">
+@{foreach (var files in ViewData['files']){
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+               <a href=""> <h3 class="panel-title">@file.name</h3></a>
+            </div>
+            <div class="panel-body">
+                <p>
+                @file.type
+                </p>
+                <p>
+                @file.path
+                </p>
+
+                <p><a class="btn btn-success pull-right" href="http://framework.zend.com/" target="_blank">Ajouter au panier</a></p>
+            </div>
+        </div>
+    </div>
+    }
+    }
+</div>
