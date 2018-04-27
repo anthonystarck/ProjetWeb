@@ -3,24 +3,41 @@
 }
 
 <div class="row">
-@{foreach (var files in ViewData['files']){
+@{foreach (var files in (dynamic)ViewData["files"]){
     <div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-heading">
-               <a href=""> <h3 class="panel-title">@file.name</h3></a>
+               <a href=""> <h3 class="panel-title">@files.Name</h3></a>
             </div>
             <div class="panel-body">
                 <p>
-                @file.type
+                    @files.Length
                 </p>
                 <p>
-                @file.path
+                    @files.Extension
+                </p>
+                <p>
+                    @files.FullName
                 </p>
 
-                <p><a class="btn btn-success pull-right" href="http://framework.zend.com/" target="_blank">Ajouter au panier</a></p>
             </div>
         </div>
     </div>
-    }
-    }
+  
+
+    <form asp-controller="Home" asp-action="Download" method="post" enctype="multipart/form-data">
+
+        <input type="hidden" name="path" value="@files.FullName" />
+        <button type="submit">DOWNLOAD</button>
+    </form>  
+
+    <form asp-controller="Home" asp-action="UploadFile" method="post"  
+      enctype="multipart/form-data">  
+      
+    <input type="file" name="file" />  
+    <button type="submit">Upload File</button> 
+
+        
+</form>
+}}
 </div>

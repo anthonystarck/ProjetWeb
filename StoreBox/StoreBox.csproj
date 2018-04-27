@@ -14,5 +14,11 @@
 
   <ItemGroup>
     <Compile Remove="Models\EmptyClass.cs" />
+    <Compile Remove="Controllers\ValuesController.cs" />
+    <Compile Remove="Controllers\CustomJwtDataFormat.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\" />
+    <Folder Include="Views\Login\" />
   </ItemGroup>
 </Project>

@@ -1,46 +1,73 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Tokens;
 
 namespace StoreBox.Controllers
 {
-    [Route("api/[controller]")]
-    public class CustomJwtDataFormat : Controller
+    public class CustomJwtDataFormat : ISecureDataFormat<AuthenticationTicket>
     {
-        // GET: api/values
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly string algorithm;
+        private readonly TokenValidationParameters validationParameters;
+
+        public CustomJwtDataFormat(string algorithm, TokenValidationParameters validationParameters)
         {
-            return new string[] { "value1", "value2" };
+            this.algorithm = algorithm;
+            this.validationParameters = validationParameters;
         }
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        public AuthenticationTicket Unprotect(string protectedText)
+            => Unprotect(protectedText, null);
+
+        public AuthenticationTicket Unprotect(string protectedText, string purpose)
         {
-            return "value";
+            var handler = new JwtSecurityTokenHandler();
+            ClaimsPrincipal principal = null;
+            SecurityToken validToken = null;
+
+            try
+            {
+                principal = handler.ValidateToken(protectedText, this.validationParameters, out validToken);
+
+                var validJwt = validToken as JwtSecurityToken;
+
+                if (validJwt == null)
+                {
+                    throw new ArgumentException("Invalid JWT");
+                }
+
+                if (!validJwt.Header.Alg.Equals(algorithm, StringComparison.Ordinal))
+                {
+                    throw new ArgumentException($"Algorithm must be '{algorithm}'");
+                }
+
+                // Additional custom validation of JWT claims here (if any)
+            }
+            catch (SecurityTokenValidationException)
+            {
+                return null;
+            }
+            catch (ArgumentException)
+            {
+                return null;
+            }
+
+            // Validation passed. Return a valid AuthenticationTicket:
+            return new AuthenticationTicket(principal, new AuthenticationProperties(), "Cookie");
         }
 
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody]string value)
+        // This ISecureDataFormat implementation is decode-only
+        public string Protect(AuthenticationTicket data)
         {
+            throw new NotImplementedException();
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public string Protect(AuthenticationTicket data, string purpose)
         {
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -17,10 +17,17 @@ namespace StoreBox.Controllers
             _next = next;
         }
 
-        public Task Invoke(HttpContext httpContext)
+        public async Task Invoke(HttpContext httpContext)
         {
 
-            return _next(httpContext);
+            var name = "access-token";
+            var cookie = httpContext.Request.Cookies[name];
+
+            if (cookie != null)
+            if (!httpContext.Request.Headers.ContainsKey("Authorization"))
+                httpContext.Request.Headers.Append("Authorization", "Bearer " + cookie);
+
+            await _next.Invoke(httpContext);
         }
     }
 
