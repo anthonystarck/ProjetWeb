@@ -78,8 +78,19 @@ namespace StoreBox
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    name: "home",
+                    template: "home/{directory?}",
+                    defaults: new { controller = "Home", action = "Index" });
+
+                routes.MapRoute(
+                    name: "homeaction",
+                    template: "Download",
+                    defaults: new { controller = "Home", action = "Download" });
+
+                routes.MapRoute(
+                    name: "upload",
+                    template: "UploadFile",
+                    defaults: new { controller = "Home", action = "UploadFile" });
 
                 /*
                 routes.MapRoute(
@@ -88,11 +99,9 @@ namespace StoreBox
                     defaults: new { controller = "Home", action = "Index" }
                 );*/
                 routes.MapRoute(
-                    name: "login",
-                    template: "login",
-                    defaults: new { controller = "Login", action = "Auth" }
-                );
-            });       
+                    name: "default",
+                        template: "{controller=Login}/{action=Auth}");
+            }); 
         }
     }
 }

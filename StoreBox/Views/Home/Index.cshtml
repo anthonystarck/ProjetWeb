@@ -1,8 +1,33 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Http
+@using System;
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="row">
+@{foreach (var directory in (dynamic)ViewData["directories"]){
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+               <a href="/home/@directory.Name"> <h3 class="panel-title">@directory.Name</h3></a>
+            </div>
+            <div class="panel-body">
+                <p>
+                   
+                </p>
+                <p>
+                    @directory.LastWriteTime
+                </p>
+                <p>
+                    @directory.FullName
+                </p>
+
+            </div>
+        </div>
+    </div>
+}}
+
+    
 @{foreach (var files in (dynamic)ViewData["files"]){
     <div class="col-md-4">
         <div class="panel panel-default">
@@ -24,7 +49,12 @@
         </div>
     </div>
   
-
+     var currentDirectory = Context.Request.Path.Value;
+            var length = currentDirectory.Length;
+            int index = currentDirectory.LastIndexOf("/");
+            if (index > 0){
+                currentDirectory = currentDirectory.Substring(index, length-index );}
+            
     <form asp-controller="Home" asp-action="Download" method="post" enctype="multipart/form-data">
 
         <input type="hidden" name="path" value="@files.FullName" />
@@ -33,6 +63,7 @@
 
     <form asp-controller="Home" asp-action="UploadFile" method="post"  
       enctype="multipart/form-data">  
+        <input type="hidden" value="@currentDirectory" name="chemin">
       
     <input type="file" name="file" />  
     <button type="submit">Upload File</button> 

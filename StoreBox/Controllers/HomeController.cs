@@ -19,12 +19,15 @@ namespace StoreBox.Controllers
 
         private FileContext _context;
         private List<FileInfo> Files;
+        private List<DirectoryInfo> Directories;
         private string user;
 
         public HomeController(FileContext context){
 
             _context = context;
             Files = new List<FileInfo>();
+            Directories = new List<DirectoryInfo>();
+
 
         }
 
@@ -32,9 +35,20 @@ namespace StoreBox.Controllers
         public IActionResult Index()
         {
 
-            user = GetUserFromToken(); 
+            this.user = GetUserFromToken();
+            var currentDirectory = Request.Path.Value;
+            var length = currentDirectory.Length;
+            int index = currentDirectory.LastIndexOf("/");
+            if (index > 0)
+                currentDirectory = currentDirectory.Substring(index, length-index );
+            if(currentDirectory != "/home"){
+
+                this.user = this.user + currentDirectory;
+            }
             GetEnvironnementFilesInfos(user);
+            GetEnvironnementDirectoryInfos(user);
             ViewData["files"] = this.Files;
+            ViewData["directories"] = this.Directories;
               
                 return View(); 
         
@@ -43,7 +57,23 @@ namespace StoreBox.Controllers
 
         }
 
+        public void GetEnvironnementDirectoryInfos(String user){
 
+            string dirPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", user);
+            List<string> dirs = new List<string>(Directory.EnumerateDirectories(dirPath));
+
+            foreach (string directoryPath in dirs)
+            {
+
+
+                this.Directories.Add(new DirectoryInfo(directoryPath));
+
+            }
+
+
+        }
+
+         
         public void GetEnvironnementFilesInfos(String user){
 
             string dirPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", user);
@@ -82,11 +112,24 @@ namespace StoreBox.Controllers
 
         public async Task<IActionResult> UploadFile(IFormFile file)  
         {  
+            this.user = GetUserFromToken();
+            var chemin = HttpContext.Request.Form["chemin"];
+            var currentDirectory = Request.Path.Value;
+            var length = currentDirectory.Length;
+            int index = currentDirectory.LastIndexOf("/");
+            if (index > 0)
+                currentDirectory = currentDirectory.Substring(index, length - index);
+            if (currentDirectory != "/home")
+            {
+
+                this.user = this.user + currentDirectory;
+            }
             if (file == null || file.Length == 0)  
                 return Content("file not selected");
-            var testUser = this.user;
+            
             var path = Path.Combine(  
-                                    Directory.GetCurrentDirectory(), "Data", this.user , file.FileName);  
+                                    Directory.GetCurrentDirectory(), "Data", GetUserFromToken() , file.FileName);
+            
   
             using (var stream = new FileStream(path, FileMode.Create))  
             {  
